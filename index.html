@@ -79,7 +79,7 @@
                 <a href="#inicio" class="hover:text-sky-400 transition">Início</a>
                 <a href="#servicos" class="hover:text-sky-400 transition">Serviços</a>
                 <a href="#orcamento" class="hover:text-sky-400 transition">Solicitar Orçamento</a>
-                <a href="#depoimentos" class="hover:text-sky-400 transition">Avaliações</a>
+                <a href="#depoimentos" class="hover:text-sky-400 transition">Recomendações</a>
                 <a href="#contato" class="hover:text-sky-400 transition">Contato</a>
             </nav>
             <div class="flex items-center gap-3">
@@ -91,9 +91,8 @@
         </div>
     </header>
 
-    <!-- Hero Section com Fundo Mais Claro -->
+    <!-- Hero Section -->
     <section id="inicio" class="relative py-20 lg:py-28 bg-corporate-900 text-white overflow-hidden min-h-[680px] flex items-center bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=900&q=80&sig=4');">
-        <!-- Sobreposição ajustada para deixar o fundo mais claro e visível -->
         <div class="absolute inset-0 bg-corporate-900/70 z-0"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
@@ -191,16 +190,53 @@
         </div>
     </section>
 
-    <!-- Depoimentos -->
+    <!-- Seção de Recomendações com Botão para o Cliente Enviar -->
     <section id="depoimentos" class="py-24 bg-white border-t border-slate-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
-                <span class="text-xs font-bold text-corporate-500 uppercase tracking-widest bg-corporate-50 px-3.5 py-1.5 rounded-full border border-corporate-100">Avaliações</span>
-                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900">O Que Nossos Clientes Dizem</h2>
+                <span class="text-xs font-bold text-blue-600 uppercase tracking-widest bg-blue-50 px-3.5 py-1.5 rounded-full border border-blue-100 flex items-center justify-center w-fit mx-auto gap-1.5">
+                    <i class="fa-brands fa-facebook text-blue-600"></i> Recomendações dos Clientes
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900">O Que Dizem Nossos Clientes</h2>
+                <div class="pt-2">
+                    <button onclick="openReviewModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl text-xs transition shadow-lg shadow-blue-600/30 inline-flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square"></i> Deixar Minha Recomendação
+                    </button>
+                </div>
             </div>
             <div id="avaliacoesGridContainer" class="grid grid-cols-1 md:grid-cols-3 gap-8"></div>
         </div>
     </section>
+
+    <!-- Modal para Envio de Avaliação pelo Cliente -->
+    <div id="reviewModal" class="hidden fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 space-y-6 shadow-2xl relative">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-brands fa-facebook text-blue-600"></i> Enviar Recomendação
+                </h3>
+                <button onclick="closeReviewModal()" class="text-slate-400 hover:text-slate-700 text-lg p-1"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p class="text-xs text-slate-500">Sua recomendação será enviada para nossa moderação e aparecerá em breve no site após a aprovação no painel.</p>
+            <form onsubmit="submitClientReview(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Seu Nome *</label>
+                    <input type="text" id="reviewName" required placeholder="Ex: Carlos Alberto" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Serviço Realizado / Aparelho *</label>
+                    <input type="text" id="reviewRole" required placeholder="Ex: Conserto de MacBook / PS4" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Sua Mensagem / Depoimento *</label>
+                    <textarea id="reviewText" required rows="3" placeholder="O que achou do atendimento?" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl text-xs transition shadow-md">
+                    Enviar Recomendação para Aprovação
+                </button>
+            </form>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer id="contato" class="bg-corporate-900 text-slate-300 pt-16 pb-12 border-t border-corporate-800">
@@ -324,31 +360,65 @@
         async function loadAvaliacoes() {
             const container = document.getElementById('avaliacoesGridContainer');
             try {
-                const { data: avaliacoes } = await sb.from('avaliacoes').select('*');
+                const { data: avaliacoes } = await sb.from('avaliacoes').select('*').eq('status', 'aprovado');
                 if (!avaliacoes || avaliacoes.length === 0) {
-                    container.innerHTML = `<p class="text-xs text-slate-400 col-span-3 text-center py-8">Nenhuma avaliação cadastrada.</p>`;
+                    container.innerHTML = `<p class="text-xs text-slate-400 col-span-3 text-center py-8">Nenhuma recomendação cadastrada no momento.</p>`;
                     return;
                 }
                 container.innerHTML = avaliacoes.map(a => `
-                    <div class="bg-white border border-slate-200 rounded-3xl p-8 flex flex-col justify-between shadow-sm">
-                        <div class="space-y-4">
-                            <div class="flex text-amber-400 text-sm gap-1">
-                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                            </div>
-                            <p class="text-slate-600 text-sm italic leading-relaxed">"${a.depoimento}"</p>
+                    <div class="bg-white border border-slate-200 rounded-3xl p-6 flex flex-col justify-between shadow-sm relative overflow-hidden group hover:border-blue-300 transition">
+                        <div class="absolute top-4 right-4 text-blue-600 text-lg opacity-80">
+                            <i class="fa-brands fa-square-facebook"></i>
                         </div>
-                        <div class="pt-6 mt-6 border-t border-slate-100 flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-corporate-100 text-corporate-600 font-bold flex items-center justify-center text-sm">
-                                ${a.nome_cliente.split(' ').map(n => n[0]).slice(0,2).join('')}
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 font-extrabold flex items-center justify-center text-base border-2 border-blue-500 shadow-sm">
+                                    ${a.nome_cliente.split(' ').map(n => n[0]).slice(0,2).join('')}
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-900 text-sm">${a.nome_cliente}</p>
+                                    <p class="text-[11px] text-blue-600 font-semibold flex items-center gap-1">
+                                        <i class="fa-solid fa-thumbs-up text-[10px]"></i> Recomenda os serviços
+                                    </p>
+                                </div>
                             </div>
-                            <div>
-                                <p class="font-bold text-slate-900 text-sm">${a.nome_cliente}</p>
-                                <p class="text-xs text-slate-500">${a.cargo_ou_papel}</p>
-                            </div>
+                            <p class="text-slate-600 text-sm italic leading-relaxed pt-2">"${a.depoimento}"</p>
+                        </div>
+                        <div class="pt-4 mt-6 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                            <span>${a.cargo_ou_papel || 'Cliente Verificado'}</span>
+                            <span class="text-emerald-600 font-semibold flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> Verificado</span>
                         </div>
                     </div>
                 `).join('');
             } catch (err) { console.error(err); }
+        }
+
+        function openReviewModal() {
+            document.getElementById('reviewModal').classList.remove('hidden');
+        }
+
+        function closeReviewModal() {
+            document.getElementById('reviewModal').classList.add('hidden');
+        }
+
+        async function submitClientReview(e) {
+            e.preventDefault();
+            const nome_cliente = document.getElementById('reviewName').value;
+            const cargo_ou_papel = document.getElementById('reviewRole').value;
+            const depoimento = document.getElementById('reviewText').value;
+            const status = 'pendente';
+
+            const { error } = await sb.from('avaliacoes').insert([{ nome_cliente, cargo_ou_papel, depoimento, status }]);
+            if (error) {
+                alert('Erro ao enviar recomendação: ' + error.message);
+            } else {
+                alert('Obrigado! Sua recomendação foi enviada e em breve aparecerá no site após a aprovação no painel.');
+                closeReviewModal();
+                document.getElementById('reviewName').value = '';
+                document.getElementById('reviewRole').value = '';
+                document.getElementById('reviewText').value = '';
+                loadAvaliacoes();
+            }
         }
 
         function submitInquiryWhatsApp(e) {
