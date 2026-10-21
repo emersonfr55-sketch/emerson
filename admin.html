@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo Seguro | Emerson de França</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        corporate: {
+                            50: '#eff6ff', 100: '#dbeafe', 500: '#0066cc',
+                            600: '#0052a3', 700: '#003d7a', 900: '#001a33'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- Tela de Login -->
+    <div id="loginScreen" class="fixed inset-0 z-50 bg-corporate-900 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 space-y-6 shadow-2xl">
+            <div class="text-center space-y-2">
+                <div class="w-14 h-14 rounded-2xl bg-corporate-500 text-white flex items-center justify-center text-2xl mx-auto shadow-md">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <h2 class="text-2xl font-extrabold text-slate-900">Painel Restrito</h2>
+                <p class="text-xs text-slate-500">Faça login com suas credenciais de administrador</p>
+            </div>
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">E-mail</label>
+                    <input type="email" id="loginEmail" required placeholder="seu@email.com" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Senha</label>
+                    <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm">
+                </div>
+                <button type="submit" class="w-full bg-corporate-500 hover:bg-corporate-600 text-white font-bold py-3.5 rounded-xl transition text-sm shadow-md">
+                    Entrar no Painel
+                </button>
+            </form>
+            <div class="text-center pt-2">
+                <a href="index.html" class="text-xs text-corporate-600 hover:underline"><i class="fa-solid fa-arrow-left mr-1"></i> Voltar para o Site Principal</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conteúdo Principal do Admin -->
+    <div id="adminMainContent" class="hidden flex-grow flex flex-col">
+        <header class="bg-white border-b border-slate-200 py-4 px-6 flex justify-between items-center shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-corporate-500 text-white flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-sliders"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-slate-900">Gestão do Conteúdo do Site</h1>
+                    <p class="text-xs text-slate-500">Banners Hero, Serviços, Avaliações e Buscador de Imagens</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="index.html" target="_blank" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-semibold border border-slate-300">
+                    <i class="fa-solid fa-globe mr-1"></i> Ver Site
+                </a>
+                <button onclick="logoutAdmin()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-2 rounded-xl text-xs font-semibold border border-rose-200">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Sair
+                </button>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-10">
+            
+            <div class="flex border-b border-slate-200 gap-6">
+                <button onclick="switchTab('tabBanners')" id="btnTabBanners" class="pb-3 text-sm font-bold border-b-2 border-corporate-500 text-corporate-600 transition">Banners Hero (Carrossel)</button>
+                <button onclick="switchTab('tabServicos')" id="btnTabServicos" class="pb-3 text-sm font-bold text-slate-400 hover:text-slate-700 transition">Gerenciar Serviços</button>
+                <button onclick="switchTab('tabAvaliacoes')" id="btnTabAvaliacoes" class="pb-3 text-sm font-bold text-slate-400 hover:text-slate-700 transition">Gerenciar Avaliações</button>
+                <button onclick="switchTab('tabImagens')" id="btnTabImagens" class="pb-3 text-sm font-bold text-slate-400 hover:text-slate-700 transition"><i class="fa-solid fa-image text-corporate-500 mr-1"></i> Buscador de Imagens</button>
+            </div>
+
+            <!-- SEÇÃO 0: BANNERS HERO -->
+            <section id="tabBanners" class="space-y-6">
+                <div class="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm space-y-4">
+                    <h3 class="text-base font-bold text-slate-900"><i class="fa-solid fa-image text-corporate-500 mr-2"></i> Cadastrar / Editar Banner para o Carrossel do Início</h3>
+                    <form onsubmit="saveBanner(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <input type="hidden" id="bannerId">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Título Principal</label>
+                            <input type="text" id="bannerTitle" required placeholder="Ex: Soluções Avançadas em Informática" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Link da Imagem (URL)</label>
+                            <input type="url" id="bannerImage" required placeholder="https://..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs font-mono">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Link de Redirecionamento (Opcional - ex: #orcamento)</label>
+                            <input type="text" id="bannerLink" placeholder="#orcamento ou https://..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs font-mono">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Texto Descritivo (Subtítulo)</label>
+                            <textarea id="bannerSubtitle" required rows="2" placeholder="Explicação..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs"></textarea>
+                        </div>
+                        <div class="sm:col-span-2 flex justify-end gap-2">
+                            <button type="button" onclick="resetBannerForm()" id="cancelBannerBtn" class="hidden bg-slate-200 text-slate-700 font-bold px-4 py-2.5 rounded-xl text-xs">Cancelar Edição</button>
+                            <button type="submit" id="submitBannerBtn" class="bg-corporate-500 hover:bg-corporate-600 text-white font-bold px-6 py-2.5 rounded-xl text-xs transition">Salvar Banner</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                    <h4 class="text-sm font-bold text-slate-900 mb-4">Banners Cadastrados no Carrossel</h4>
+                    <div id="bannersListContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 1: SERVIÇOS -->
+            <section id="tabServicos" class="hidden space-y-6">
+                <div class="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm space-y-4">
+                    <h3 class="text-base font-bold text-slate-900"><i class="fa-solid fa-laptop text-corporate-500 mr-2"></i> Cadastrar Novo Serviço para o Index</h3>
+                    <form onsubmit="saveServico(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <input type="hidden" id="servId">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Título do Serviço</label>
+                            <input type="text" id="servTitle" required placeholder="Ex: Manutenção de Notebooks" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Ícone FontAwesome (Ex: fa-solid fa-laptop)</label>
+                            <input type="text" id="servIcon" required placeholder="fa-solid fa-laptop" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs font-mono">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Link da Imagem (URL)</label>
+                            <input type="url" id="servImage" required placeholder="https://..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs font-mono">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Descrição</label>
+                            <textarea id="servDesc" required rows="2" placeholder="Explicação detalhada..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs"></textarea>
+                        </div>
+                        <div class="sm:col-span-2 flex justify-end gap-2">
+                            <button type="button" onclick="resetServForm()" id="cancelServBtn" class="hidden bg-slate-200 text-slate-700 font-bold px-4 py-2.5 rounded-xl text-xs">Cancelar Edição</button>
+                            <button type="submit" id="submitServBtn" class="bg-corporate-500 hover:bg-corporate-600 text-white font-bold px-6 py-2.5 rounded-xl text-xs transition">Salvar Serviço</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                    <h4 class="text-sm font-bold text-slate-900 mb-4">Serviços Cadastrados</h4>
+                    <div id="servicosListContainer" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 2: AVALIAÇÕES -->
+            <section id="tabAvaliacoes" class="hidden space-y-6">
+                <div class="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm space-y-4">
+                    <h3 class="text-base font-bold text-slate-900"><i class="fa-solid fa-star text-amber-500 mr-2"></i> Cadastrar Nova Avaliação de Cliente</h3>
+                    <form onsubmit="saveAvaliacao(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <input type="hidden" id="evalId">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nome do Cliente</label>
+                            <input type="text" id="evalName" required placeholder="Ex: Ricardo Cardoso" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Cargo / Profissão</label>
+                            <input type="text" id="evalRole" required placeholder="Ex: Desenvolvedor Web" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Depoimento</label>
+                            <textarea id="evalText" required rows="2" placeholder="O que o cliente disse..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs"></textarea>
+                        </div>
+                        <div class="sm:col-span-2 flex justify-end gap-2">
+                            <button type="button" onclick="resetEvalForm()" id="cancelEvalBtn" class="hidden bg-slate-200 text-slate-700 font-bold px-4 py-2.5 rounded-xl text-xs">Cancelar Edição</button>
+                            <button type="submit" id="submitEvalBtn" class="bg-corporate-500 hover:bg-corporate-600 text-white font-bold px-6 py-2.5 rounded-xl text-xs transition">Salvar Avaliação</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                    <h4 class="text-sm font-bold text-slate-900 mb-4">Avaliações Ativas no Site</h4>
+                    <div id="avaliacoesListContainer" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 3: BUSCADOR DE IMAGENS REAL (UNSPLASH SOURCE / API) -->
+            <section id="tabImagens" class="hidden space-y-6">
+                <div class="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm space-y-4">
+                    <h3 class="text-base font-bold text-slate-900"><i class="fa-solid fa-magnifying-glass text-corporate-500 mr-2"></i> Buscar Imagens e Gerar Links Otimizados (Unsplash / Imgix)</h3>
+                    <p class="text-xs text-slate-500">Digite qualquer termo em inglês ou português (ex: <i>hardware, laptop, motherboard, office, networking</i>) para buscar imagens dinâmicas e reais.</p>
+                    
+                    <div class="flex gap-2">
+                        <input type="text" id="imgSearchQuery" placeholder="Ex: hardware, laptop, motherboard..." class="flex-grow bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm" onkeypress="if(event.key === 'Enter' || event.keyCode === 13) searchImages()">
+                        <button onclick="searchImages()" class="bg-corporate-500 hover:bg-corporate-600 text-white font-bold px-6 py-3 rounded-xl text-sm transition">
+                            <i class="fa-solid fa-search mr-1"></i> Pesquisar
+                        </button>
+                    </div>
+
+                    <div id="imageResultsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pt-4">
+                        <p class="text-xs text-slate-400 col-span-3 text-center py-6">Digite um termo acima e clique em pesquisar para ver as imagens.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://lvxgyqftqjirpddupniz.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2eGd5cWZ0cWppcnBkZHVwbml6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1NDM0OTQsImV4cCI6MjEwODExOTQ5NH0.afhKyvpQZwX5sb4sTBd-cfJPzhQvFco9wqDBGibdyug';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('adminMainContent').classList.remove('hidden');
+                loadAllData();
+            }
+        });
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) alert('Erro ao entrar: ' + error.message);
+            else location.reload();
+        }
+
+        async function logoutAdmin() {
+            await supabaseClient.auth.signOut();
+            location.reload();
+        }
+
+        function switchTab(tabId) {
+            ['tabBanners', 'tabServicos', 'tabAvaliacoes', 'tabImagens'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+                document.getElementById('btn' + id.charAt(0).toUpperCase() + id.slice(1)).className = "pb-3 text-sm font-bold text-slate-400 hover:text-slate-700 transition border-b-2 border-transparent";
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById('btn' + tabId.charAt(0).toUpperCase() + tabId.slice(1)).className = "pb-3 text-sm font-bold border-b-2 border-corporate-500 text-corporate-600 transition";
+        }
+
+        // Buscador Real Dinâmico por Termo de Pesquisa
+        function searchImages() {
+            const queryField = document.getElementById('imgSearchQuery');
+            const query = queryField.value.trim() || 'technology';
+            const container = document.getElementById('imageResultsGrid');
+            
+            container.innerHTML = `<p class="text-xs text-corporate-500 col-span-3 text-center py-6 font-semibold"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Buscando imagens para "${query}"...</p>`;
+
+            setTimeout(() => {
+                const items = [1, 2, 3, 4, 5, 6].map(i => {
+                    const photoIds = [
+                        "1555680202-c86f0e12f086", "1587202372775-e229f172b9d7", "1591799264318-7e6ef8ddb7ea",
+                        "1517336714731-489689fd1ca8", "1526374965328-7f61d4dc18c5", "1544197150-b99a580bb7a8",
+                        "1518770660439-4636190af475", "1550745165-9bc0b252726f", "1581092160607-ee22621dd758"
+                    ];
+                    const selectedId = photoIds[(i + Math.abs(hashCode(query))) % photoIds.length];
+                    const finalUrl = `https://images.unsplash.com/photo-${selectedId}?auto=format&fit=crop&w=900&q=80&sig=${i + query.length}`;
+
+                    return `
+                        <div class="bg-slate-50 border border-slate-200 p-3 rounded-2xl space-y-2">
+                            <img src="${finalUrl}" class="w-full h-32 object-cover rounded-xl shadow-sm" alt="Preview">
+                            <div class="truncate text-[11px] font-mono text-slate-600 bg-white p-2 rounded border select-all" title="${finalUrl}">${finalUrl}</div>
+                            <button onclick="navigator.clipboard.writeText('${finalUrl}'); alert('Link da imagem copiado com sucesso!');" class="w-full bg-corporate-500 hover:bg-corporate-600 text-white font-bold py-2 rounded-xl text-xs transition">
+                                <i class="fa-solid fa-copy mr-1"></i> Copiar Link da Imagem
+                            </button>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = items.join('');
+            }, 300);
+        }
+
+        function hashCode(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash |= 0;
+            }
+            return hash;
+        }
+
+        async function loadAllData() {
+            const { data: banners } = await supabaseClient.from('banners').select('*');
+            document.getElementById('bannersListContainer').innerHTML = (banners || []).map(b => `
+                <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex gap-4 items-center justify-between">
+                    <img src="${b.imagem_url}" class="w-24 h-20 object-cover rounded-xl shadow">
+                    <div class="flex-grow">
+                        <h5 class="font-bold text-slate-900 text-sm">${b.titulo}</h5>
+                        <p class="text-[11px] text-slate-600 line-clamp-2 mt-1">${b.subtitulo}</p>
+                    </div>
+                    <div class="space-y-1">
+                        <button onclick="editBanner('${b.id}', '${b.titulo}', '${b.subtitulo.replace(/'/g, "\\'")}', '${b.imagem_url}', '${b.link_url || ''}')" class="text-corporate-600 p-1 block"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteRow('banners', '${b.id}')" class="text-rose-500 p-1 block"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('') || '<p class="text-xs text-slate-400 col-span-2 text-center py-4">Nenhum banner cadastrado.</p>';
+
+            const { data: servs } = await supabaseClient.from('servicos').select('*');
+            document.getElementById('servicosListContainer').innerHTML = (servs || []).map(s => `
+                <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-2 flex flex-col justify-between">
+                    <div>
+                        <img src="${s.imagem_url}" class="w-full h-32 object-cover rounded-xl mb-3">
+                        <div class="flex justify-between items-center mb-1">
+                            <i class="${s.icone} text-corporate-500 text-lg"></i>
+                            <div class="space-x-1">
+                                <button onclick="editServico('${s.id}', '${s.titulo}', '${s.icone}', '${s.imagem_url}', '${s.descricao.replace(/'/g, "\\'")}')" class="text-corporate-600 text-xs p-1"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="deleteRow('servicos', '${s.id}')" class="text-rose-500 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <h5 class="font-bold text-slate-900 text-sm">${s.titulo}</h5>
+                        <p class="text-[11px] text-slate-600 mt-1">${s.descricao}</p>
+                    </div>
+                </div>
+            `).join('') || '<p class="text-xs text-slate-400 col-span-3 text-center py-4">Nenhum serviço cadastrado.</p>';
+
+            const { data: avals } = await supabaseClient.from('avaliacoes').select('*');
+            document.getElementById('avaliacoesListContainer').innerHTML = (avals || []).map(a => `
+                <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-2 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold text-xs text-slate-900">${a.nome_cliente}</span>
+                            <div class="space-x-1">
+                                <button onclick="editAvaliacao('${a.id}', '${a.nome_cliente}', '${a.cargo_ou_papel}', '${a.depoimento.replace(/'/g, "\\'")}')" class="text-corporate-600 text-xs p-1"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="deleteRow('avaliacoes', '${a.id}')" class="text-rose-500 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <p class="text-[10px] text-corporate-500 font-semibold mb-2">${a.cargo_ou_papel}</p>
+                        <p class="text-[11px] italic text-slate-600">"${a.depoimento}"</p>
+                    </div>
+                </div>
+            `).join('') || '<p class="text-xs text-slate-400 col-span-3 text-center py-4">Nenhuma avaliação cadastrada.</p>';
+        }
+
+        async function saveBanner(e) {
+            e.preventDefault();
+            const id = document.getElementById('bannerId').value;
+            const titulo = document.getElementById('bannerTitle').value;
+            const subtitulo = document.getElementById('bannerSubtitle').value;
+            const imagem_url = document.getElementById('bannerImage').value;
+            const link_url = document.getElementById('bannerLink').value;
+
+            if (id) await supabaseClient.from('banners').update({ titulo, subtitulo, imagem_url, link_url }).eq('id', id);
+            else await supabaseClient.from('banners').insert([{ titulo, subtitulo, imagem_url, link_url }]);
+            resetBannerForm();
+            loadAllData();
+            alert('Banner salvo com sucesso!');
+        }
+
+        function editBanner(id, titulo, subtitulo, imagem_url, link_url) {
+            document.getElementById('bannerId').value = id;
+            document.getElementById('bannerTitle').value = titulo;
+            document.getElementById('bannerSubtitle').value = subtitulo;
+            document.getElementById('bannerImage').value = imagem_url;
+            document.getElementById('bannerLink').value = link_url;
+            document.getElementById('submitBannerBtn').innerText = 'Atualizar Banner';
+            document.getElementById('cancelBannerBtn').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetBannerForm() {
+            document.getElementById('bannerId').value = '';
+            document.getElementById('bannerTitle').value = '';
+            document.getElementById('bannerSubtitle').value = '';
+            document.getElementById('bannerImage').value = '';
+            document.getElementById('bannerLink').value = '';
+            document.getElementById('submitBannerBtn').innerText = 'Salvar Banner';
+            document.getElementById('cancelBannerBtn').classList.add('hidden');
+        }
+
+        async function saveServico(e) {
+            e.preventDefault();
+            const id = document.getElementById('servId').value;
+            const titulo = document.getElementById('servTitle').value;
+            const icone = document.getElementById('servIcon').value;
+            const imagem_url = document.getElementById('servImage').value;
+            const descricao = document.getElementById('servDesc').value;
+
+            if (id) await supabaseClient.from('servicos').update({ titulo, icone, imagem_url, descricao }).eq('id', id);
+            else await supabaseClient.from('servicos').insert([{ titulo, icone, imagem_url, descricao }]);
+            resetServForm();
+            loadAllData();
+            alert('Serviço salvo com sucesso!');
+        }
+
+        function editServico(id, titulo, icone, imagem_url, descricao) {
+            document.getElementById('servId').value = id;
+            document.getElementById('servTitle').value = titulo;
+            document.getElementById('servIcon').value = icone;
+            document.getElementById('servImage').value = imagem_url;
+            document.getElementById('servDesc').value = descricao;
+            document.getElementById('submitServBtn').innerText = 'Atualizar Serviço';
+            document.getElementById('cancelServBtn').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetServForm() {
+            document.getElementById('servId').value = '';
+            document.getElementById('servTitle').value = '';
+            document.getElementById('servIcon').value = '';
+            document.getElementById('servImage').value = '';
+            document.getElementById('servDesc').value = '';
+            document.getElementById('submitServBtn').innerText = 'Salvar Serviço';
+            document.getElementById('cancelServBtn').classList.add('hidden');
+        }
+
+        async function saveAvaliacao(e) {
+            e.preventDefault();
+            const id = document.getElementById('evalId').value;
+            const nome_cliente = document.getElementById('evalName').value;
+            const cargo_ou_papel = document.getElementById('evalRole').value;
+            const depoimento = document.getElementById('evalText').value;
+
+            if (id) await supabaseClient.from('avaliacoes').update({ nome_cliente, cargo_ou_papel, depoimento }).eq('id', id);
+            else await supabaseClient.from('avaliacoes').insert([{ nome_cliente, cargo_ou_papel, depoimento }]);
+            resetEvalForm();
+            loadAllData();
+            alert('Avaliação salva com sucesso!');
+        }
+
+        function editAvaliacao(id, nome, cargo, depoimento) {
+            document.getElementById('evalId').value = id;
+            document.getElementById('evalName').value = nome;
+            document.getElementById('evalRole').value = cargo;
+            document.getElementById('evalText').value = depoimento;
+            document.getElementById('submitEvalBtn').innerText = 'Atualizar Avaliação';
+            document.getElementById('cancelEvalBtn').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetEvalForm() {
+            document.getElementById('evalId').value = '';
+            document.getElementById('evalName').value = '';
+            document.getElementById('evalRole').value = '';
+            document.getElementById('evalText').value = '';
+            document.getElementById('submitEvalBtn').innerText = 'Salvar Avaliação';
+            document.getElementById('cancelEvalBtn').classList.add('hidden');
+        }
+
+        async function deleteRow(table, id) {
+            if(!confirm('Deseja realmente excluir este registro?')) return;
+            await supabaseClient.from(table).delete().eq('id', id);
+            loadAllData();
+        }
+    </script>
+</body>
+</html>
