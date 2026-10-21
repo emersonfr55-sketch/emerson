@@ -243,7 +243,6 @@
             document.getElementById('btn' + tabId.charAt(0).toUpperCase() + tabId.slice(1)).className = "pb-3 text-sm font-bold border-b-2 border-corporate-500 text-corporate-600 transition";
         }
 
-        // Banco de Fotos Indexado por Categorias de Alta Precisão para garantir fotos reais correspondentes ao termo
         const imageDatabase = {
             iphone: [
                 "1510557880182-3d4d3cba35a5", "1511707171634-5f897ff02aa9", "1556656793-08538906a9f8",
@@ -283,7 +282,6 @@
             ]
         };
 
-        // Buscador Inteligente Direto que processa o termo digitado e exibe 20 imagens reais, limpas e exclusivas
         function searchImages() {
             const queryField = document.getElementById('imgSearchQuery');
             const rawQuery = queryField.value.trim().toLowerCase();
