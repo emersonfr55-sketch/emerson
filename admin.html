@@ -94,7 +94,7 @@
                         <input type="hidden" id="bannerId">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Título Principal</label>
-                            <input type="text" id="bannerTitle" required placeholder="Ex: Soluções Avançadas em Informática" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs">
+                            <input type="text" id="bannerTitle" required placeholder="Ex: Especialista em Toda a Linha Apple" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Link da Imagem (URL)</label>
@@ -211,6 +211,8 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2eGd5cWZ0cWppcnBkZHVwbml6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1NDM0OTQsImV4cCI6MjEwODExOTQ5NH0.afhKyvpQZwX5sb4sTBd-cfJPzhQvFco9wqDBGibdyug';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        let bannersCache = [];
+
         window.addEventListener('DOMContentLoaded', async () => {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
@@ -248,37 +250,19 @@
                 "1510557880182-3d4d3cba35a5", "1511707171634-5f897ff02aa9", "1556656793-08538906a9f8",
                 "1592750475338-74b7b21085ab", "1530319067432-f2a729c03db5", "1573148192305-64f1d227b682",
                 "1575695342320-d2d2d2f9b73f", "1512499617640-c74ae3a79d37", "1580910051074-3eb694886505",
-                "1565849904461-04a58ad377e0", "1523206489230-c012c64b2b48", "1533228876829-65c94e79502a",
-                "1526738549149-8e07eca6c147", "1511556532299-8f662fc26c06", "1563245372-f21724e3856d",
-                "1546868871-7041f2a55e12", "1551352934-22d7ba51346d", "1509198397868-475647b2a1e5",
-                "1510557880182-3d4d3cba35a5", "1511707171634-5f897ff02aa9"
+                "1565849904461-04a58ad377e0", "1523206489230-c012c64b2b48", "1533228876829-65c94e79502a"
             ],
             carros: [
                 "1503376780353-7e6692767b70", "1552519507-da3b142c6e3d", "1542282088-72c9c27ed0cd",
-                "1502877338535-766e1452684a", "1533473359331-0135ef1b58bf", "1492144534655-ae79c964c9d7",
-                "1563720223185-11003d516935", "1583121274602-3e2820c69888", "1617814076367-b759c7d7e738",
-                "1555215695-3004980ad54e", "1489824904134-891ab64532f1", "1526726538690-5cbf956ae2fd",
-                "1503376780353-7e6692767b70", "1552519507-da3b142c6e3d", "1542282088-72c9c27ed0cd",
-                "1502877338535-766e1452684a", "1533473359331-0135ef1b58bf", "1492144534655-ae79c964c9d7",
-                "1563720223185-11003d516935", "1583121274602-3e2820c69888"
+                "1502877338535-766e1452684a", "1533473359331-0135ef1b58bf", "1492144534655-ae79c964c9d7"
             ],
             notebook: [
                 "1517336714731-489689fd1ca8", "1498050108023-c5249f4df085", "1588872657578-7efd1f1555ed",
-                "1461749280684-dccba630e2f6", "1531482615713-2afd69097998", "1525547719571-a2d4ac8945e2",
-                "1550745165-9bc0b252726f", "1526374965328-7f61d4dc18c5", "1518770660439-4636190af475",
-                "1581092160607-ee22621dd758", "1504384308090-c894fdcc538d", "1517336714731-489689fd1ca8",
-                "1498050108023-c5249f4df085", "1588872657578-7efd1f1555ed", "1461749280684-dccba630e2f6",
-                "1531482615713-2afd69097998", "1525547719571-a2d4ac8945e2", "1550745165-9bc0b252726f",
-                "1526374965328-7f61d4dc18c5", "1518770660439-4636190af475"
+                "1461749280684-dccba630e2f6", "1531482615713-2afd69097998", "1525547719571-a2d4ac8945e2"
             ],
             futebol: [
                 "1508098682722-e99c43a406b2", "1574629810360-7efbbe195018", "1518091043644-c1d4457512c6",
-                "1543326727-cf6c39e8f84c", "1511886929837-354d827aae26", "1560272564-c83b66b1ad12",
-                "1579952363873-27f3bade9f55", "1517649763962-0c6232660102", "1508098682722-e99c43a406b2",
-                "1574629810360-7efbbe195018", "1518091043644-c1d4457512c6", "1543326727-cf6c39e8f84c",
-                "1511886929837-354d827aae26", "1560272564-c83b66b1ad12", "1579952363873-27f3bade9f55",
-                "1517649763962-0c6232660102", "1508098682722-e99c43a406b2", "1574629810360-7efbbe195018",
-                "1518091043644-c1d4457512c6", "1543326727-cf6c39e8f84c"
+                "1543326727-cf6c39e8f84c", "1511886929837-354d827aae26", "1560272564-c83b66b1ad12"
             ]
         };
 
@@ -309,7 +293,7 @@
 
                     return `
                         <div class="bg-slate-50 border border-slate-200 p-3 rounded-2xl space-y-2 flex flex-col justify-between">
-                            <img src="${finalUrl}" class="w-full h-28 object-cover rounded-xl shadow-sm" alt="${rawQuery}" onerror="this.src='https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80'">
+                            <img src="${finalUrl}" class="w-full h-28 object-cover rounded-xl shadow-sm" alt="${rawQuery}">
                             <div class="truncate text-[10px] font-mono text-slate-600 bg-white p-1.5 rounded border select-all" title="${finalUrl}">${finalUrl}</div>
                             <button onclick="navigator.clipboard.writeText('${finalUrl}'); alert('Link copiado com sucesso!');" class="w-full bg-corporate-500 hover:bg-corporate-600 text-white font-bold py-2 rounded-xl text-xs transition">
                                 <i class="fa-solid fa-copy mr-1"></i> Copiar Link
@@ -324,16 +308,18 @@
 
         async function loadAllData() {
             const { data: banners } = await supabaseClient.from('banners').select('*');
-            document.getElementById('bannersListContainer').innerHTML = (banners || []).map(b => `
+            bannersCache = banners || [];
+            
+            document.getElementById('bannersListContainer').innerHTML = bannersCache.map((b, index) => `
                 <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex gap-4 items-center justify-between">
-                    <img src="${b.imagem_url}" class="w-24 h-20 object-cover rounded-xl shadow">
-                    <div class="flex-grow">
-                        <h5 class="font-bold text-slate-900 text-sm">${b.titulo}</h5>
+                    <img src="${b.imagem_url}" class="w-24 h-20 object-cover rounded-xl shadow shrink-0">
+                    <div class="flex-grow min-w-0">
+                        <h5 class="font-bold text-slate-900 text-sm truncate">${b.titulo.replace(/<[^>]*>?/gm, '')}</h5>
                         <p class="text-[11px] text-slate-600 line-clamp-2 mt-1">${b.subtitulo}</p>
                     </div>
-                    <div class="space-y-1">
-                        <button onclick="editBanner('${b.id}', '${b.titulo}', '${b.subtitulo.replace(/'/g, "\\'")}', '${b.imagem_url}', '${b.link_url || ''}')" class="text-corporate-600 p-1 block"><i class="fa-solid fa-pen"></i></button>
-                        <button onclick="deleteRow('banners', '${b.id}')" class="text-rose-500 p-1 block"><i class="fa-solid fa-trash"></i></button>
+                    <div class="space-y-1 shrink-0">
+                        <button onclick="editBanner(${index})" class="text-corporate-600 p-2 hover:bg-corporate-50 rounded-lg transition block"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteRow('banners', '${b.id}')" class="text-rose-500 p-2 hover:bg-rose-50 rounded-lg transition block"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 </div>
             `).join('') || '<p class="text-xs text-slate-400 col-span-2 text-center py-4">Nenhum banner cadastrado.</p>';
@@ -346,7 +332,7 @@
                         <div class="flex justify-between items-center mb-1">
                             <i class="${s.icone} text-corporate-500 text-lg"></i>
                             <div class="space-x-1">
-                                <button onclick="editServico('${s.id}', '${s.titulo}', '${s.icone}', '${s.imagem_url}', '${s.descricao.replace(/'/g, "\\'")}')" class="text-corporate-600 text-xs p-1"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="editServico('${s.id}', '${s.titulo.replace(/'/g, "\\'")}', '${s.icone}', '${s.imagem_url}', '${s.descricao.replace(/'/g, "\\'")}')" class="text-corporate-600 text-xs p-1"><i class="fa-solid fa-pen"></i></button>
                                 <button onclick="deleteRow('servicos', '${s.id}')" class="text-rose-500 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
                             </div>
                         </div>
@@ -389,12 +375,13 @@
             alert('Banner salvo com sucesso!');
         }
 
-        function editBanner(id, titulo, subtitulo, imagem_url, link_url) {
-            document.getElementById('bannerId').value = id;
-            document.getElementById('bannerTitle').value = titulo;
-            document.getElementById('bannerSubtitle').value = subtitulo;
-            document.getElementById('bannerImage').value = imagem_url;
-            document.getElementById('bannerLink').value = link_url;
+        function editBanner(index) {
+            const b = bannersCache[index];
+            document.getElementById('bannerId').value = b.id;
+            document.getElementById('bannerTitle').value = b.titulo;
+            document.getElementById('bannerSubtitle').value = b.subtitulo;
+            document.getElementById('bannerImage').value = b.imagem_url;
+            document.getElementById('bannerLink').value = b.link_url || '';
             document.getElementById('submitBannerBtn').innerText = 'Atualizar Banner';
             document.getElementById('cancelBannerBtn').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
